@@ -305,9 +305,14 @@ export default function App() {
   useEffect(() => { fetchTasks() }, [])
 
   const fetchTasks = async () => {
-    const res = await fetch('/api/tasks')
-    const data = await res.json()
-    setTasks(data)
+    try {
+      const res = await fetch('/api/tasks')
+      if (!res.ok) throw new Error('Error del servidor')
+      const data = await res.json()
+      setTasks(data)
+    } catch (error) {
+      console.error('Error al cargar tareas:', error)
+    }
   }
 
   const addTask = async (data) => {
@@ -324,26 +329,44 @@ export default function App() {
         setDuplicateWarning(dup)
         return 'duplicate'
       }
+      if (!res.ok) throw new Error('Error al crear tarea')
       const task = await res.json()
       setTasks(prev => [task, ...prev])
+    } catch (error) {
+      console.error('Error al añadir tarea:', error)
     } finally {
       setLoading(false)
     }
   }
 
   const updateTask = async (id, data) => {
-    const res = await fetch(`/api/tasks/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-    const updated = await res.json()
-    setTasks(prev => prev.map(t => t.id === id ? updated : t))
+    const previous = tasks.find(t => t.id === id)
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...data } : t))
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      if (!res.ok) throw new Error('Error al actualizar')
+      const updated = await res.json()
+      setTasks(prev => prev.map(t => t.id === id ? updated : t))
+    } catch (error) {
+      console.error('Error al actualizar tarea:', error)
+      if (previous) setTasks(prev => prev.map(t => t.id === id ? previous : t))
+    }
   }
 
   const deleteTask = async (id) => {
-    await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    const previous = tasks.find(t => t.id === id)
     setTasks(prev => prev.filter(t => t.id !== id))
+    try {
+      const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Error al eliminar')
+    } catch (error) {
+      console.error('Error al eliminar tarea:', error)
+      if (previous) setTasks(prev => [...prev, previous].sort((a, b) => a.position - b.position))
+    }
   }
 
   const handleDragEnd = async (event) => {
@@ -351,17 +374,25 @@ export default function App() {
     if (!over || active.id === over.id) return
 
     const pending = tasks.filter(t => !t.completed)
+    const completed = tasks.filter(t => t.completed)
     const oldIndex = pending.findIndex(t => t.id === active.id)
     const newIndex = pending.findIndex(t => t.id === over.id)
     const reordered = arrayMove(pending, oldIndex, newIndex)
-    const completed = tasks.filter(t => t.completed)
+    const previousOrder = [...tasks]
+
     setTasks([...reordered, ...completed])
 
-    await fetch('/api/tasks/reorder', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderedIds: reordered.map(t => t.id) })
-    })
+    try {
+      const res = await fetch('/api/tasks/reorder', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds: reordered.map(t => t.id) })
+      })
+      if (!res.ok) throw new Error('Error al guardar orden')
+    } catch (error) {
+      console.error('Error al reordenar:', error)
+      setTasks(previousOrder)
+    }
   }
 
   const handleReprioritize = async () => {
