@@ -21,7 +21,7 @@ App de gestión de tareas con inteligencia artificial integrada. La IA analiza c
 | Capa | Tecnología |
 |---|---|
 | Frontend | React 19, Vite, Tailwind CSS, dnd-kit |
-| Backend | Node.js, Express |
+| Backend | Node.js, Express, Helmet |
 | IA | Ollama — llama3.2 (local) |
 | Base de datos | SQLite + Prisma ORM |
 
