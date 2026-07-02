@@ -2,10 +2,6 @@
 
 App de gestión de tareas con inteligencia artificial integrada. La IA analiza cada tarea al crearla, asigna prioridad automáticamente, sugiere fechas límite y detecta duplicados. El usuario puede ajustar todo manualmente y conversar con la IA sobre su lista de tareas.
 
-## Demo
-
-> Video demo próximamente
-
 ## Características
 
 - **Priorización automática** — al crear una tarea, la IA le asigna prioridad (alta/media/baja), categoría y fecha límite sugerida según el contenido
