@@ -99,7 +99,7 @@ const reorderTasks = async (req, res) => {
     const { orderedIds } = req.body
     if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'orderedIds debe ser un array' })
 
-    await Promise.all(
+    await prisma.$transaction(
       orderedIds.map((id, index) =>
         prisma.task.update({ where: { id: Number(id) }, data: { position: index } })
       )
@@ -119,7 +119,7 @@ const reprioritizeTasks = async (req, res) => {
 
     const result = await reprioritize(tasks)
     if (Array.isArray(result.reordered)) {
-      await Promise.all(
+      await prisma.$transaction(
         result.reordered.map((id, index) =>
           prisma.task.update({ where: { id: Number(id) }, data: { position: index } })
         )

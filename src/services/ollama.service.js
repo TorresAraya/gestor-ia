@@ -27,7 +27,7 @@ Reglas:
     model: MODEL,
     prompt,
     stream: false
-  })
+  }, { timeout: 60000 })
 
   const text = response.data.response.trim()
   const jsonMatch = text.match(/\{[\s\S]*\}/)
@@ -70,7 +70,7 @@ Responde SOLO con este JSON, sin texto adicional:
     model: MODEL,
     prompt,
     stream: false
-  })
+  }, { timeout: 60000 })
 
   const text = response.data.response.trim()
   const jsonMatch = text.match(/\{[\s\S]*\}/)
@@ -99,7 +99,7 @@ Los IDs son: ${tasks.map(t => t.id).join(', ')}`
     model: MODEL,
     prompt,
     stream: false
-  })
+  }, { timeout: 60000 })
 
   const text = response.data.response.trim()
   const jsonMatch = text.match(/\{[\s\S]*\}/)
@@ -130,7 +130,7 @@ Responde de forma concisa y útil en español, basándote en la lista real de ta
     model: MODEL,
     prompt,
     stream: false
-  })
+  }, { timeout: 60000 })
 
   return response.data.response.trim()
 }
